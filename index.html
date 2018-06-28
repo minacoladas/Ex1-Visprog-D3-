@@ -5,7 +5,9 @@
 		<title>D3: SVG bar chart with value labels (centered)</title>
 		<script type="text/javascript" src="https://d3js.org/d3.v3.js"></script>
 		<style type="text/css">
-			/* No style rules here yet */		
+            rect:hover {
+                fill: red;
+            }		
 		</style>
 	</head>
 	<body>
@@ -13,22 +15,14 @@
 		<script type="text/javascript">
 			//Width and height
             var counter = 5;
+            var sortCounter = 5;
 			var w = 500;
 			var h = 250;
             var labelPadding = 2;
             var barPadding = 1;
-            var maxOpacity = 25;
-			
-			//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
-				//			11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
-            
-            var dataset = [ [5, 23, 75], [10, 14, 34], [13, 67, 23], [19, 10, 65], [21, 42, 29], [25, 25, 25], [22, 90, 30], [18, 57, 17], [15, 25, 35], [13, 26, 39], [11, 17, 85], [12, 36, 24], [15, 60, 45], [20, 41, 11], [18, 77, 33], [17, 85, 55], [16, 23, 44], [18, 35, 23], [23, 55, 15], [25, 45, 100] ];
-			
-            var maxWidth = w / dataset.length - barPadding;
-            
-            var getWidth = function (d, i) {
-                return dataset[i][1] / 100 * maxWidth;
-            }
+            var minOpacity = 25;
+			var dataset = [ [5, 23, 75], [10, 14, 34], [13, 67, 23], [19, 10, 65], [21, 42, 29], [25, 25, 25], [22, 90, 30], [18, 57, 17], [15, 25, 35], [13, 26, 39], [11, 17, 85], [12, 36, 24], [15, 60, 45], [20, 41, 11], [18, 77, 33], [17, 85, 55], [16, 23, 44], [18, 35, 23], [23, 55, 15], [25, 45, 100] ];
+			var maxWidth = w / dataset.length - barPadding;
             
             var xScale = d3.scale.ordinal()
 							.domain(d3.range(dataset.length))
@@ -50,6 +44,7 @@
 			   .data(dataset)
 			   .enter()
 			   .append("rect")
+               .on("click", function() { sortBars(); })
 			   .attr("x", function(d, i) {
 			   		return xScale(i);
 			   })
@@ -62,8 +57,8 @@
 			   })
                .attr("fill", "rgb(0, 0, 200)")
 			   .attr("fill-opacity", function(d) {
-                    if (d[2] < maxOpacity) {
-                        return maxOpacity / 100;
+                    if (d[2] < minOpacity) {
+                        return minOpacity / 100;
                     } else {
 					return d[2] / 100;
                     }
@@ -90,6 +85,105 @@
 			   .attr("font-size", "11px")
 			   .attr("fill", "red");
             
+            
+            
+            /******************
+            Sort Bars Function
+            ******************/
+            
+            var sortBars = function() {
+                if (5 % sortCounter == 0) {
+                    sortCounter = 4;
+                    svg.selectAll("rect")
+                        .sort(function(a, b) {
+                            return d3.ascending(a[0], b[0]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(1000)
+                        .attr("x", function(d, i) {
+                            return xScale(i);
+                        });
+                    svg.selectAll("text")
+				        .sort(function(a, b) {
+                            return d3.ascending(a[0], b[0]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(500)
+                        .ease("elastic")
+				        .text(function(d) {
+			   		        return d[0];
+			             })
+                        .attr("x", function(d, i) {
+			   		        return xScale(i);
+			             })
+                        .attr("y", function(d) {
+			   		        return (h - yScale(d[0]) - labelPadding);
+                        });
+            
+                } else if (5 % sortCounter == 1) {
+                    sortCounter = 3;
+                    svg.selectAll("rect")
+                        .sort(function(a, b) {
+                            return d3.ascending(a[1], b[1]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(1000)
+                        .attr("x", function(d, i) {
+                            return xScale(i);
+                        });
+                    svg.selectAll("text")
+				        .sort(function(a, b) {
+                            return d3.ascending(a[1], b[1]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(500)
+                        .ease("elastic")
+				        .text(function(d) {
+			   		        return d[1];
+			             })
+                        .attr("x", function(d, i) {
+			   		        return xScale(i);
+			             })
+                        .attr("y", function(d) {
+			   		        return (h - yScale(d[0]) - labelPadding);
+                        });
+                } else if (5 % sortCounter == 2) { 
+                    sortCounter = 5;
+                    svg.selectAll("rect")
+                        .sort(function(a, b) {
+                            return d3.ascending(a[2], b[2]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(1000)
+                        .attr("x", function(d, i) {
+                            return xScale(i);
+                        });
+                    svg.selectAll("text")
+				        .sort(function(a, b) {
+                            return d3.ascending(a[2], b[2]);
+                        })
+                        .transition()
+                        .delay(function(d, i) { return i * 50; })
+                        .duration(500)
+                        .ease("elastic")
+				        .text(function(d) {
+			   		        return d[2];
+			             })
+                        .attr("x", function(d, i) {
+			   		        return xScale(i);
+			             })
+                        .attr("y", function(d) {
+			   		        return (h - yScale(d[0]) - labelPadding);
+                        });
+                }
+            };
+            
+            
             /********************************
             EVENT LISTENER FOR HEIGHT CHANGER
             ********************************/
@@ -101,6 +195,10 @@
             //Update all rects
             svg.selectAll("rect")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.attr("y", function(d) {
 					   return (h - (yScale(d[0]) * 0.333333));
 				})
@@ -110,8 +208,8 @@
 				})
 				.attr("fill", "rgb(0, 0, 200)")
 			    .attr("fill-opacity", function(d) {
-                    if (d[2] < maxOpacity) {
-                        return maxOpacity / 100;
+                    if (d[2] < minOpacity) {
+                        return minOpacity / 100;
                     } else {
 					return d[2] / 100;
                     }
@@ -119,6 +217,10 @@
             //Update all labels
             svg.selectAll("text")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.text(function(d) {
 			   		return d[0];
 			   })
@@ -128,13 +230,17 @@
                .attr("y", function(d) {
 			   		return (h - (yScale(d[0]) * 0.333333) - labelPadding);
                });
-            //Update counter 
+            
             //next piece of modulo switch
             } else if (5 % counter == 1) { 
             counter = 3;
             //Update all rects
             svg.selectAll("rect")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.attr("y", function(d) {
 					   return (h - (yScale(d[0]) * 0.666666));
 				})
@@ -144,8 +250,8 @@
 				})
 				.attr("fill", "rgb(0, 0, 200)")
 			    .attr("fill-opacity", function(d) {
-                    if (d[2] < maxOpacity) {
-                        return maxOpacity / 100;
+                    if (d[2] < minOpacity) {
+                        return minOpacity / 100;
                     } else {
 					return d[2] / 100;
                     }
@@ -153,6 +259,10 @@
             //Update all labels
             svg.selectAll("text")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.text(function(d) {
 			   		return d[0];
 			   })
@@ -162,13 +272,17 @@
                .attr("y", function(d) {
 			   		return (h - (yScale(d[0]) * 0.666666) - labelPadding);
                });
-            //Update counter 
+            
             //back to normal part of modulo switch
             } else if (5 % counter == 2) {
             counter = 5;
             //Update all rects
             svg.selectAll("rect")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.attr("y", function(d) {
 					   return h - yScale(d[0]);
 				})
@@ -178,8 +292,8 @@
 				})
 				.attr("fill", "rgb(0, 0, 200)")
 			    .attr("fill-opacity", function(d) {
-                    if (d[2] < maxOpacity) {
-                        return maxOpacity / 100;
+                    if (d[2] < minOpacity) {
+                        return minOpacity / 100;
                     } else {
 					return d[2] / 100;
                     }
@@ -187,6 +301,10 @@
             //Update all labels
             svg.selectAll("text")
 				.data(dataset)
+                .transition()
+                .delay(function(d, i) { return i * 50; })
+                .duration(500)
+                .ease("elastic")
 				.text(function(d) {
 			   		return d[0];
 			   })
@@ -196,10 +314,13 @@
                .attr("y", function(d) {
 			   		return (h - yScale(d[0]) - labelPadding);
                });
-            //Update counter 
+            
             }
             }); 
-
+            
+            
+            
+            
 			
 		</script>
 	</body>
