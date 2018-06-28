@@ -9,13 +9,14 @@
 		</style>
 	</head>
 	<body>
+        <p>Click on this text to scale the height of the chart.</p>
 		<script type="text/javascript">
 			//Width and height
-            var paddedHeight = 120;
+            var counter = 5;
 			var w = 500;
-			var h = 100;
-			var barPadding = 1;
+			var h = 250;
             var labelPadding = 2;
+            var barPadding = 1;
             var maxOpacity = 25;
 			
 			//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
@@ -25,27 +26,39 @@
 			
             var maxWidth = w / dataset.length - barPadding;
             
+            var getWidth = function (d, i) {
+                return dataset[i][1] / 100 * maxWidth;
+            }
+            
+            var xScale = d3.scale.ordinal()
+							.domain(d3.range(dataset.length))
+							.rangeRoundBands([0, w], 0.05);
+            
+            var yScale = d3.scale.linear()
+							.domain([0, d3.max(dataset, function(d) { return d[0]; })])
+							.range([0, h - 10]);
+
             
 			//Create SVG element
 			var svg = d3.select("body")
 						.append("svg")
 						.attr("width", w)
-						.attr("height", paddedHeight);
+						.attr("height", h);
+            
+            //Create bars
 			svg.selectAll("rect")
 			   .data(dataset)
 			   .enter()
 			   .append("rect")
 			   .attr("x", function(d, i) {
-			   		return i * (w / dataset.length);
+			   		return xScale(i);
 			   })
 			   .attr("y", function(d) {
-			   		return paddedHeight - (d[0] * 4);
+			   		return h - yScale(d[0]);
 			   })
-			   .attr("width", function(d) {
-                    return (d[1] / 100) * maxWidth;
-               })
+			   .attr("width", function(d) { return d[1] / 100 * xScale.rangeBand(); })
 			   .attr("height", function(d) {
-			   		return d[0] * 4;
+			   		return yScale(d[0]);
 			   })
                .attr("fill", "rgb(0, 0, 200)")
 			   .attr("fill-opacity", function(d) {
@@ -55,6 +68,8 @@
 					return d[2] / 100;
                     }
 			   });
+            
+            //Create labels
 			svg.selectAll("text")
 			   .data(dataset)
 			   .enter()
@@ -62,15 +77,129 @@
 			   .text(function(d) {
 			   		return d[0];
 			   })
-			   .attr("x", function(d, i) {
-			   		return i * (w / dataset.length);
+               .attr("x", function(d, i) {
+			   		return xScale(i);
 			   })
-			   .attr("y", function(d) {
+			   /*.attr("y", function(d) {
 			   		return paddedHeight - (d[0] * 4 + labelPadding);
-			   })
+			   }) */
+               .attr("y", function(d) {
+			   		return h - yScale(d[0]) - labelPadding;
+               })
 			   .attr("font-family", "sans-serif")
 			   .attr("font-size", "11px")
 			   .attr("fill", "red");
+            
+            /********************************
+            EVENT LISTENER FOR HEIGHT CHANGER
+            ********************************/
+            d3.select("p")
+				.on("click", function() {
+            //if statement for modulo switch
+            if (5 % counter == 0) {
+            counter = 4;
+            //Update all rects
+            svg.selectAll("rect")
+				.data(dataset)
+				.attr("y", function(d) {
+					   return (h - (yScale(d[0]) * 0.333333));
+				})
+            //set to 1/3 height for this part of switch
+				.attr("height", function(d) {
+					   return yScale(d[0]) * 0.333333;
+				})
+				.attr("fill", "rgb(0, 0, 200)")
+			    .attr("fill-opacity", function(d) {
+                    if (d[2] < maxOpacity) {
+                        return maxOpacity / 100;
+                    } else {
+					return d[2] / 100;
+                    }
+			   });
+            //Update all labels
+            svg.selectAll("text")
+				.data(dataset)
+				.text(function(d) {
+			   		return d[0];
+			   })
+               .attr("x", function(d, i) {
+			   		return xScale(i);
+			   })
+               .attr("y", function(d) {
+			   		return (h - (yScale(d[0]) * 0.333333) - labelPadding);
+               });
+            //Update counter 
+            //next piece of modulo switch
+            } else if (5 % counter == 1) { 
+            counter = 3;
+            //Update all rects
+            svg.selectAll("rect")
+				.data(dataset)
+				.attr("y", function(d) {
+					   return (h - (yScale(d[0]) * 0.666666));
+				})
+            //set to 2/3 height for this part of switch
+				.attr("height", function(d) {
+					   return yScale(d[0]) * 0.666666;
+				})
+				.attr("fill", "rgb(0, 0, 200)")
+			    .attr("fill-opacity", function(d) {
+                    if (d[2] < maxOpacity) {
+                        return maxOpacity / 100;
+                    } else {
+					return d[2] / 100;
+                    }
+			   });
+            //Update all labels
+            svg.selectAll("text")
+				.data(dataset)
+				.text(function(d) {
+			   		return d[0];
+			   })
+               .attr("x", function(d, i) {
+			   		return xScale(i);
+			   })
+               .attr("y", function(d) {
+			   		return (h - (yScale(d[0]) * 0.666666) - labelPadding);
+               });
+            //Update counter 
+            //back to normal part of modulo switch
+            } else if (5 % counter == 2) {
+            counter = 5;
+            //Update all rects
+            svg.selectAll("rect")
+				.data(dataset)
+				.attr("y", function(d) {
+					   return h - yScale(d[0]);
+				})
+            //set to full height for this part of switch
+				.attr("height", function(d) {
+					   return yScale(d[0]);
+				})
+				.attr("fill", "rgb(0, 0, 200)")
+			    .attr("fill-opacity", function(d) {
+                    if (d[2] < maxOpacity) {
+                        return maxOpacity / 100;
+                    } else {
+					return d[2] / 100;
+                    }
+			   });
+            //Update all labels
+            svg.selectAll("text")
+				.data(dataset)
+				.text(function(d) {
+			   		return d[0];
+			   })
+               .attr("x", function(d, i) {
+			   		return xScale(i);
+			   })
+               .attr("y", function(d) {
+			   		return (h - yScale(d[0]) - labelPadding);
+               });
+            //Update counter 
+            }
+            }); 
+
 			
 		</script>
 	</body>
